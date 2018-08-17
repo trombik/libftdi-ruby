@@ -147,8 +147,14 @@ module Ftdi
 
     # Initializes new libftdi context.
     # @raise [CannotInitializeContextError] libftdi cannot be initialized.
-    def initialize(address = nil)
-      ptr = address ? address : Ftdi.ftdi_new
+    def initialize(p = nil)
+      if p
+        ptr = p
+        @release_me = false
+      else
+        ptr = Ftdi.ftdi_new()
+        @release_me = true
+      end
       raise CannotInitializeContextError.new  if ptr.nil?
       super(ptr)
     end
@@ -156,7 +162,7 @@ module Ftdi
     # Deinitialize and free an ftdi context.
     # @return [NilClass] nil
     def self.release(p)
-      Ftdi.ftdi_free(p)
+      Ftdi.ftdi_free(p) if @release_me
       nil
     end
 
